@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Google Sheets - Números</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4285f4, #34a853);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .config-section h3 {
+            color: #4285f4;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .sheet-info {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .sheet-info h4 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+
+        .tab-selector {
+            margin: 20px 0;
+        }
+
+        .tab-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tab-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+        }
+
+        .tab-selector select:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #ffc107, #ff9800);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .consult-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .consult-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .consult-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .consult-input-group input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .consult-input-group input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .consult-btn {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .consult-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result.found {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .result.not-found {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-table th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .info {
+            background: #e7f3ff;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4285f4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .data-info {
+            background: #e8f5e8;
+            color: #2d5a2d;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .empty-sheet {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .consult-input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Consulta Google Sheets</h1>
+            <p>Sistema de consulta automática - Planilha configurada</p>
+        </div>
+
+        <div class="content">
+            <div class="info">
+                <strong>💡 Sistema configurado automaticamente:</strong><br>
+                1. Planilha pré-configurada e conectada<br>
+                2. Selecione a aba desejada<br>
+                3. Digite números para consultar
+            </div>
+
+            <div class="config-section">
+                <h3>⚙️ Configuração da Planilha</h3>
+                
+                <div class="sheet-info">
+                    <h4>📊 Informações da Planilha</h4>
+                    <strong>ID da Planilha:</strong> 1NV0uPbo7mppwdaVLpadnisr5EXBo6-F_3koAb-Dl9d0<br>
+                    <strong>Status:</strong> <span id="connectionStatus">Conectando...</span>
+                </div>
+
+                <div class="tab-selector">
+                    <label for="tabSelect">📋 Selecione a Aba:</label>
+                    <select id="tabSelect" onchange="loadTabData()">
+                        <option value="">Carregando abas...</option>
+                    </select>
+                </div>
+                
+                <button class="connect-btn" onclick="loadAllTabs()">
+                    🔄 Carregar Todas as Abas
+                </button>
+                
+                <button class="refresh-btn" onclick="refreshCurrentTab()" style="display: none;">
+                    🔄 Atualizar Dados
+                </button>
+            </div>
+
+            <div class="status" id="status"></div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Conectando ao Google Sheets...</p>
+            </div>
+
+            <div class="data-info" id="dataInfo" style="display: none;">
+                <strong>📊 Dados Carregados:</strong><br>
+                <span id="dataDetails"></span>
+            </div>
+
+            <div class="empty-sheet" id="emptySheet" style="display: none;">
+                <strong>⚠️ Planilha Vazia:</strong><br>
+                A aba selecionada está vazia ou não contém dados.<br>
+                Adicione dados na planilha e clique em "Atualizar Dados".
+            </div>
+
+            <div class="consult-section" id="consultSection">
+                <h3>🔍 Consultar Número</h3>
+                <div class="consult-input-group">
+                    <input type="text" id="numberInput" placeholder="Digite o número para consultar" onkeypress="handleKeyPress(event)">
+                    <button class="consult-btn" onclick="consultNumber()">🔍 Consultar</button>
+                </div>
+            </div>
+
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração fixa da planilha
+        const SHEET_ID = '1NV0uPbo7mppwdaVLpadnisr5EXBo6-F_3koAb-Dl9d0';
+        const COLUMN_NAME = 'A'; // Coluna padrão para consulta
+
+        let sheetData = null;
+        let currentTab = null;
+        let allTabs = [];
+        let isConnected = false;
+
+        // Carregar automaticamente ao iniciar
+        window.addEventListener('load', function() {
+            loadAllTabs();
+        });
+
+        function loadAllTabs() {
+            showLoading(true);
+            showStatus('🔄 Carregando abas da planilha...', 'info');
+            updateConnectionStatus('Conectando...');
+
+            // Lista expandida de abas comuns para tentar
+            const commonTabs = [
+                'Página1', 'Planilha1', 'Sheet1', 'Aba1', 'Dados', 'Identificadores', 'Lista',
+                'Planilha', 'Sheet', 'Aba', 'Dados1', 'Lista1', 'Identificadores1',
+                'Usuários', 'Clientes', 'Números', 'IDs', 'Registros'
+            ];
+            
+            Promise.all(commonTabs.map(tab => 
+                fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text().then(csv => ({ tab, csv, success: true }));
+                        } else {
+                            return { tab, success: false };
+                        }
+                    })
+                    .catch(() => ({ tab, success: false }))
+            ))
+            .then(results => {
+                const availableTabs = results.filter(r => r.success);
+                
+                if (availableTabs.length === 0) {
+                    throw new Error('Nenhuma aba encontrada. Verifique se a planilha existe e está compartilhada publicamente.');
+                }
+
+                allTabs = availableTabs;
+                populateTabSelector(availableTabs);
+                
+                // Carregar primeira aba automaticamente
+                if (availableTabs.length > 0) {
+                    loadTabData(availableTabs[0].tab, availableTabs[0].csv);
+                }
+
+                updateConnectionStatus('Conectado');
+                showStatus(`✅ ${availableTabs.length} aba(s) encontrada(s)`, 'success');
+            })
+            .catch(error => {
+                showStatus('❌ ' + error.message, 'error');
+                updateConnectionStatus('Erro de conexão');
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+
+        function populateTabSelector(tabs) {
+            const select = document.getElementById('tabSelect');
+            select.innerHTML = '';
+            
+            tabs.forEach(tab => {
+                const option = document.createElement('option');
+                option.value = tab.tab;
+                option.textContent = tab.tab;
+                select.appendChild(option);
+            });
+        }
+
+        function loadTabData(tabName = null, csvData = null) {
+            const selectedTab = tabName || document.getElementById('tabSelect').value;
+            
+            if (!selectedTab) {
+                showStatus('❌ Selecione uma aba.', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showStatus(`🔄 Carregando dados da aba "${selectedTab}"...`, 'info');
+
+            if (csvData) {
+                processTabData(selectedTab, csvData);
+            } else {
+                // Buscar dados da aba selecionada
+                fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(selectedTab)}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erro ao acessar a aba "${selectedTab}"`);
+                        }
+                        return response.text();
+                    })
+                    .then(csv => {
+                        processTabData(selectedTab, csv);
+                    })
+                    .catch(error => {
+                        showStatus('❌ ' + error.message, 'error');
+                    })
+                    .finally(() => {
+                        showLoading(false);
+                    });
+            }
+        }
+
+        function processTabData(tabName, csv) {
+            try {
+                sheetData = parseCSV(csv);
+                currentTab = tabName;
+                
+                if (sheetData.length === 0) {
+                    // Planilha vazia
+                    showEmptySheetMessage();
+                    return;
+                }
+
+                // Verificar se há dados válidos (não apenas células vazias)
+                const hasValidData = sheetData.some(row => {
+                    return Object.values(row).some(value => value && value.trim() !== '');
+                });
+
+                if (!hasValidData) {
+                    showEmptySheetMessage();
+                    return;
+                }
+
+                isConnected = true;
+                showStatus(`✅ Dados carregados da aba "${tabName}"! ${sheetData.length} registros encontrados.`, 'success');
+                document.getElementById('consultSection').style.display = 'block';
+                document.querySelector('.refresh-btn').style.display = 'inline-block';
+                document.getElementById('emptySheet').style.display = 'none';
+                
+                showDataInfo(sheetData, tabName);
+                
+            } catch (error) {
+                throw new Error('Erro ao processar dados: ' + error.message);
+            }
+        }
+
+        function showEmptySheetMessage() {
+            document.getElementById('emptySheet').style.display = 'block';
+            document.getElementById('consultSection').style.display = 'none';
+            document.getElementById('dataInfo').style.display = 'none';
+            showStatus('⚠️ A aba selecionada está vazia. Adicione dados na planilha.', 'warning');
+        }
+
+        function refreshCurrentTab() {
+            if (currentTab) {
+                loadTabData(currentTab);
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    data.push(row);
+                }
+            }
+            
+            return data;
+        }
+
+        function showDataInfo(data, tabName) {
+            const dataInfo = document.getElementById('dataInfo');
+            const dataDetails = document.getElementById('dataDetails');
+            
+            const headers = Object.keys(data[0]);
+            const totalRows = data.length;
+            
+            dataDetails.innerHTML = `
+                📋 Aba atual: <strong>${tabName}</strong><br>
+                📊 Total de registros: <strong>${totalRows}</strong><br>
+                📋 Colunas disponíveis: ${headers.join(', ')}<br>
+                🎯 Coluna de consulta: <strong>${headers[0] || 'Coluna A'}</strong>
+            `;
+            
+            dataInfo.style.display = 'block';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                consultNumber();
+            }
+        }
+
+        function consultNumber() {
+            const number = document.getElementById('numberInput').value.trim();
+            
+            if (!number) {
+                showStatus('❌ Digite um número para consultar.', 'error');
+                return;
+            }
+
+            if (!sheetData || !isConnected) {
+                showStatus('❌ Nenhum dado carregado.', 'error');
+                return;
+            }
+
+            const headers = Object.keys(sheetData[0]);
+            const searchColumn = headers[0]; // Sempre usa a primeira coluna
+            
+            const result = sheetData.filter(row => {
+                const value = row[searchColumn];
+                return value && value.toString() === number;
+            });
+
+            showResult(result, number, searchColumn, currentTab);
+        }
+
+        function showResult(result, number, columnName, tabName) {
+            const resultDiv = document.getElementById('result');
+            
+            if (result.length > 0) {
+                resultDiv.className = 'result found';
+                resultDiv.style.display = 'block';
+                
+                let html = `
+                    <h3>✅ Número ${number} ENCONTRADO!</h3>
+                    <p>📊 Encontrado ${result.length} registro(s) na aba "${tabName}" - Coluna "${columnName}":</p>
+                `;
+                
+                if (result.length > 0) {
+                    html += '<table class="result-table">';
+                    html += '<thead><tr>';
+                    Object.keys(result[0]).forEach(key => {
+                        html += `<th>${key}</th>`;
+                    });
+                    html += '</tr></thead><tbody>';
+                    
+                    result.forEach(row => {
+                        html += '<tr>';
+                        Object.values(row).forEach(value => {
+                            html += `<td>${value}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    
+                    html += '</tbody></table>';
+                }
+                
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.className = 'result not-found';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>❌ Número ${number} NÃO encontrado</h3>
+                    <p>O número não foi encontrado na aba "${tabName}" - Coluna "${columnName}".</p>
+                `;
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            document.getElementById('connectionStatus').textContent = status;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html> 

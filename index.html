@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Identificadores</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-search"></i> Consulta de Identificadores</h1>
+                <p>Sistema de consulta de identificadores via Google Sheets</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="search-section">
+                <div class="search-container">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" placeholder="Digite o identificador..." class="search-input">
+                        <button id="searchButton" class="search-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-card" id="resultCard">
+                    <div class="result-icon" id="resultIcon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3 id="resultTitle">Identificador Encontrado</h3>
+                        <p id="resultMessage">O identificador foi encontrado na base de dados.</p>
+                        <div class="result-details" id="resultDetails"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sheets-section">
+                <h2><i class="fas fa-table"></i> Abas Disponíveis</h2>
+                <div class="sheets-container" id="sheetsContainer">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando abas...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Sistema de Consulta de Identificadores</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
