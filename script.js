@@ -52,46 +52,37 @@ async function loadAllSheets() {
             </div>
         `;
 
-        // Lista de abas conhecidas (você pode adicionar mais conforme necessário)
-        const knownSheets = [
-            { name: 'Identificadores', gid: '0' },
-            { name: 'Clientes', gid: '1' },
-            { name: 'Produtos', gid: '2' },
-            { name: 'Vendas', gid: '3' },
-            { name: 'Fornecedores', gid: '4' }
-        ];
+        // Primeiro, vamos tentar carregar a aba principal (gid=0)
+        // que contém os dados de "Usuários Chave Pix CDB"
+        const mainSheetData = await loadSheetData('0');
+        
+        if (mainSheetData && Object.keys(mainSheetData).length > 0) {
+            sheetsData['Usuários Chave Pix CDB'] = mainSheetData;
+            sheetsInfo.push({
+                name: 'Usuários Chave Pix CDB',
+                count: Object.keys(mainSheetData).length,
+                lastUpdate: new Date().toLocaleDateString('pt-BR')
+            });
+        }
 
-        sheetsData = {};
-        sheetsInfo = [];
-
-        // Carregar cada aba
-        for (const sheet of knownSheets) {
+        // Tentar carregar outras abas comuns (se existirem)
+        const commonGids = ['1', '2', '3', '4', '5'];
+        const sheetNames = ['Aba 2', 'Aba 3', 'Aba 4', 'Aba 5', 'Aba 6'];
+        
+        for (let i = 0; i < commonGids.length; i++) {
             try {
-                const sheetData = await loadSheetData(sheet.gid);
+                const sheetData = await loadSheetData(commonGids[i]);
                 if (sheetData && Object.keys(sheetData).length > 0) {
-                    sheetsData[sheet.name] = sheetData;
+                    const sheetName = sheetNames[i];
+                    sheetsData[sheetName] = sheetData;
                     sheetsInfo.push({
-                        name: sheet.name,
+                        name: sheetName,
                         count: Object.keys(sheetData).length,
                         lastUpdate: new Date().toLocaleDateString('pt-BR')
                     });
                 }
             } catch (error) {
-                console.log(`Erro ao carregar aba ${sheet.name}:`, error.message);
-            }
-        }
-
-        // Se nenhuma aba foi carregada, tentar carregar a aba padrão
-        if (Object.keys(sheetsData).length === 0) {
-            console.log('Tentando carregar aba padrão...');
-            const defaultSheetData = await loadSheetData('0');
-            if (defaultSheetData && Object.keys(defaultSheetData).length > 0) {
-                sheetsData['Identificadores'] = defaultSheetData;
-                sheetsInfo.push({
-                    name: 'Identificadores',
-                    count: Object.keys(defaultSheetData).length,
-                    lastUpdate: new Date().toLocaleDateString('pt-BR')
-                });
+                console.log(`Aba ${commonGids[i]} não encontrada ou vazia:`, error.message);
             }
         }
         
@@ -171,10 +162,10 @@ function processSheetData(data) {
     // Processar cada linha
     rows.forEach((row, index) => {
         if (row.c && row.c.length > 0) {
-            // Assumindo que a primeira coluna é o identificador
+            // Assumindo que a primeira coluna é o identificador (customer_id)
             const identifier = row.c[0]?.v || '';
             
-            if (identifier && identifier !== 'Identificador' && identifier !== 'customer_id') {
+            if (identifier && identifier !== 'customer_id' && identifier !== 'Identificador') {
                 identifiers[identifier.toString()] = {
                     value: identifier.toString(),
                     row: index + 1,

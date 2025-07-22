@@ -1,13 +1,13 @@
-# Guia do Sistema de Consulta Multi-Abas
+# Guia do Sistema de Consulta de Usuários Chave Pix CDB
 
 ## 📋 Visão Geral
 
-O sistema de consulta de identificadores foi atualizado para suportar múltiplas abas do Google Sheets, permitindo:
+O sistema de consulta foi desenvolvido especificamente para trabalhar com a planilha de **Usuários Chave Pix CDB**, permitindo:
 
-- **Visualização de todas as abas** disponíveis na planilha
-- **Busca em múltiplas abas** simultaneamente
-- **Identificação da aba específica** onde o identificador foi encontrado
-- **Informações detalhadas** sobre cada aba (quantidade de registros, última atualização)
+- **Visualização das abas** disponíveis na planilha específica
+- **Busca por customer_id** na planilha de Usuários Chave Pix CDB
+- **Identificação da aba específica** onde o usuário foi encontrado
+- **Informações detalhadas** sobre cada consulta
 
 ## 🚀 Como Executar
 
@@ -30,19 +30,19 @@ http://localhost:8000/index.html
 
 ### Visualização de Abas
 
-O sistema agora exibe todas as abas disponíveis na planilha com:
+O sistema detecta automaticamente as abas disponíveis na planilha de Usuários Chave Pix CDB:
 
-- **Nome da aba**
-- **Quantidade de identificadores** cadastrados
+- **Nome da aba** (ex: "Usuários Chave Pix CDB")
+- **Quantidade de registros** cadastrados
 - **Data da última atualização**
 - **Indicador visual** de status
 
-### Busca Inteligente
+### Busca por Customer ID
 
 Ao realizar uma consulta, o sistema:
 
-1. **Verifica todas as abas** automaticamente
-2. **Identifica a aba específica** onde o identificador foi encontrado
+1. **Verifica todas as abas** da planilha automaticamente
+2. **Identifica a aba específica** onde o customer_id foi encontrado
 3. **Mostra informações detalhadas** como:
    - Nome da aba
    - Linha na planilha
@@ -51,52 +51,29 @@ Ao realizar uma consulta, o sistema:
 
 ### Resultados Detalhados
 
-#### ✅ Identificador Encontrado
+#### ✅ Usuário Encontrado
 - **Aba:** Nome da aba onde foi encontrado
 - **Linha na planilha:** Posição exata do registro
 - **Data da consulta:** Timestamp da busca
 - **Total de abas verificadas:** Quantidade de abas processadas
 
-#### ❌ Identificador Não Encontrado
+#### ❌ Usuário Não Encontrado
 - **Data da consulta:** Timestamp da busca
 - **Total de abas verificadas:** Quantidade de abas processadas
 - **Abas disponíveis:** Lista de todas as abas verificadas
 
-## 🔧 Configuração das Abas
+## 🔧 Estrutura da Planilha
 
-### Estrutura da Planilha
+### Planilha Principal
+- **URL:** https://docs.google.com/spreadsheets/d/1NV0uPbo7mppwdaVLpadnisr5EXBo6-F_3koAb-Dl9d0/edit?gid=0#gid=0
+- **Aba Principal:** Usuários Chave Pix CDB (GID: 0)
+- **Coluna de Identificação:** customer_id (coluna A)
 
-O sistema está configurado para trabalhar com as seguintes abas:
-
-| GID | Nome da Aba | Descrição |
-|-----|-------------|-----------|
-| 0 | Identificadores | Aba principal de identificadores |
-| 1 | Clientes | Dados de clientes |
-| 2 | Produtos | Catálogo de produtos |
-| 3 | Vendas | Registro de vendas |
-| 4 | Fornecedores | Dados de fornecedores |
-
-### Adicionando Novas Abas
-
-Para adicionar novas abas, edite o arquivo `script.js` na seção `knownSheets`:
-
-```javascript
-const knownSheets = [
-    { name: 'Identificadores', gid: '0' },
-    { name: 'Clientes', gid: '1' },
-    { name: 'Produtos', gid: '2' },
-    { name: 'Vendas', gid: '3' },
-    { name: 'Fornecedores', gid: '4' },
-    { name: 'Nova Aba', gid: '5' } // Adicione aqui
-];
-```
-
-### Encontrando o GID de uma Aba
-
-1. Abra sua planilha no Google Sheets
-2. Clique na aba desejada
-3. Observe a URL: `https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=GID`
-4. O número após `gid=` é o GID da aba
+### Dados Processados
+O sistema processa automaticamente:
+- **customer_id:** Identificador único do usuário
+- **Outras colunas:** Dados adicionais do usuário (nome, email, etc.)
+- **Múltiplas abas:** Se existirem outras abas na planilha
 
 ## 📱 Interface Responsiva
 
@@ -118,11 +95,11 @@ O sistema atualiza automaticamente os dados:
 
 ### Erro ao Carregar Abas
 
-Se algumas abas não carregarem:
+Se as abas não carregarem:
 
-1. **Verifique se a aba existe** na planilha
-2. **Confirme o GID** está correto
-3. **Verifique as permissões** da planilha (deve estar pública ou compartilhada)
+1. **Verifique se a planilha está acessível** (pública ou compartilhada)
+2. **Confirme se o SHEET_ID está correto** no código
+3. **Verifique se há dados na aba principal**
 
 ### Erro de CORS
 
@@ -149,8 +126,8 @@ Se os dados parecem desatualizados:
 - ✅ Animações suaves e feedback visual
 
 ### Funcionalidade
-- ✅ Busca em múltiplas abas
-- ✅ Identificação da aba específica
+- ✅ Busca específica por customer_id
+- ✅ Detecção automática de abas
 - ✅ Informações detalhadas dos resultados
 - ✅ Atualizações automáticas
 
@@ -160,13 +137,34 @@ Se os dados parecem desatualizados:
 - ✅ Cache de dados otimizado
 - ✅ Interface responsiva
 
-## 🎯 Próximas Melhorias
+## 🎯 Como Usar
 
-- [ ] Filtros por aba
-- [ ] Exportação de resultados
-- [ ] Histórico de consultas
-- [ ] Notificações em tempo real
-- [ ] Dashboard com estatísticas
+### 1. Buscar um Usuário
+1. Digite o **customer_id** no campo de busca
+2. Clique em "Buscar" ou pressione Enter
+3. Aguarde o resultado da consulta
+
+### 2. Interpretar os Resultados
+- **Verde:** Usuário encontrado com detalhes da aba
+- **Vermelho:** Usuário não encontrado
+- **Amarelo:** Erro na consulta
+
+### 3. Visualizar Abas
+- As abas disponíveis são exibidas automaticamente
+- Cada card mostra a quantidade de registros
+- Clique em uma aba para ver mais detalhes (futuro)
+
+## 🔧 Configuração Avançada
+
+### Modificar SHEET_ID
+Para usar com outra planilha, edite o arquivo `script.js`:
+
+```javascript
+const SHEET_ID = 'SEU_NOVO_SHEET_ID';
+```
+
+### Adicionar Novas Abas
+O sistema detecta automaticamente abas com GIDs de 0 a 5. Para mais abas, edite o array `commonGids` no arquivo `script.js`.
 
 ## 📞 Suporte
 
@@ -179,6 +177,7 @@ Para dúvidas ou problemas:
 
 ---
 
-**Versão:** 2.0 - Sistema Multi-Abas  
+**Versão:** 2.0 - Sistema Específico para Usuários Chave Pix CDB  
 **Data:** Dezembro 2024  
+**Planilha:** https://docs.google.com/spreadsheets/d/1NV0uPbo7mppwdaVLpadnisr5EXBo6-F_3koAb-Dl9d0/edit?gid=0#gid=0  
 **Compatibilidade:** Google Sheets, Navegadores Modernos 
