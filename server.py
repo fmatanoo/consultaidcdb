@@ -30,8 +30,17 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Rota para buscar dados do Google Sheets
         if self.path.startswith('/api/sheets'):
             try:
-                # URL do Google Sheets
-                sheet_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:json&gid=0"
+                # Parse da URL para obter parâmetros
+                parsed_url = urlparse(self.path)
+                params = parse_qs(parsed_url.query)
+                
+                # Obter o GID (ID da aba) dos parâmetros, padrão é '0'
+                gid = params.get('gid', ['0'])[0]
+                
+                # URL do Google Sheets com GID específico
+                sheet_url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:json&gid={gid}"
+                
+                print(f"Carregando aba com GID: {gid}")
                 
                 # Fazer requisição para o Google Sheets
                 with urllib.request.urlopen(sheet_url) as response:
@@ -44,6 +53,7 @@ class CORSHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(data.encode())
                 
             except Exception as e:
+                print(f"Erro ao carregar aba {gid}: {str(e)}")
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -60,9 +70,11 @@ def main():
     # Criar servidor
     with socketserver.TCPServer(("", PORT), CORSHTTPRequestHandler) as httpd:
         print(f"🚀 Servidor rodando em http://localhost:{PORT}")
-        print(f"📁 Abra http://localhost:{PORT}/index.html no navegador")
+        print(f"📁 Aba http://localhost:{PORT}/index.html no navegador")
         print(f"🔧 Para parar o servidor, pressione Ctrl+C")
         print(f"📊 API disponível em http://localhost:{PORT}/api/sheets")
+        print(f"📋 Exemplo: http://localhost:{PORT}/api/sheets?gid=0 (primeira aba)")
+        print(f"📋 Exemplo: http://localhost:{PORT}/api/sheets?gid=1 (segunda aba)")
         
         try:
             httpd.serve_forever()

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Identificadores</title>
+    <title>Consulta de Identificadores - Sistema Multi-Abas</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,13 +13,20 @@
         <header class="header">
             <div class="header-content">
                 <h1><i class="fas fa-search"></i> Consulta de Identificadores</h1>
-                <p>Sistema de consulta de identificadores via Google Sheets</p>
+                <p>Sistema de consulta multi-abas via Google Sheets</p>
+                <div class="header-stats">
+                    <span><i class="fas fa-table"></i> Múltiplas Abas</span>
+                    <span><i class="fas fa-database"></i> Busca Inteligente</span>
+                    <span><i class="fas fa-clock"></i> Tempo Real</span>
+                </div>
             </div>
         </header>
 
         <main class="main-content">
             <div class="search-section">
                 <div class="search-container">
+                    <h2><i class="fas fa-search"></i> Buscar Identificador</h2>
+                    <p>Digite o identificador que deseja consultar em todas as abas da planilha</p>
                     <div class="input-group">
                         <input type="text" id="searchInput" placeholder="Digite o identificador..." class="search-input">
                         <button id="searchButton" class="search-button">
@@ -44,6 +51,7 @@
 
             <div class="sheets-section">
                 <h2><i class="fas fa-table"></i> Abas Disponíveis</h2>
+                <p class="section-description">Visualize todas as abas da planilha e a quantidade de identificadores em cada uma</p>
                 <div class="sheets-container" id="sheetsContainer">
                     <div class="loading">
                         <i class="fas fa-spinner fa-spin"></i>
@@ -54,7 +62,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Sistema de Consulta de Identificadores</p>
+            <p>&copy; 2024 Sistema de Consulta de Identificadores - Versão Multi-Abas</p>
         </footer>
     </div>
 

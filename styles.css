@@ -47,6 +47,61 @@ body {
     color: #718096;
     font-size: 1.1rem;
     font-weight: 400;
+    margin-bottom: 20px;
+}
+
+.header-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.header-stats span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 20px;
+}
+
+.header-stats span i {
+    font-size: 1rem;
+}
+
+/* Section descriptions */
+.section-description {
+    color: #718096;
+    font-size: 1rem;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Search section improvements */
+.search-container h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-container h2 i {
+    color: #667eea;
+}
+
+.search-container p {
+    color: #718096;
+    font-size: 1rem;
+    margin-bottom: 25px;
+    text-align: center;
 }
 
 /* Main Content */
@@ -164,6 +219,7 @@ body {
 .result-details {
     font-size: 0.95rem;
     opacity: 0.8;
+    line-height: 1.6;
 }
 
 /* Sheets Section */
@@ -191,7 +247,7 @@ body {
 
 .sheets-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
 
@@ -199,35 +255,55 @@ body {
     background: white;
     border: 2px solid #e2e8f0;
     border-radius: 15px;
-    padding: 20px;
+    padding: 25px;
     transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.sheet-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.sheet-card:hover::before {
+    transform: scaleX(1);
 }
 
 .sheet-card:hover {
     border-color: #667eea;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
 }
 
 .sheet-card h3 {
     color: #2d3748;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .sheet-card h3 i {
     color: #667eea;
+    font-size: 1.2rem;
 }
 
 .sheet-card p {
     color: #718096;
-    font-size: 0.95rem;
-    margin-bottom: 15px;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    font-weight: 500;
 }
 
 .sheet-info {
@@ -236,6 +312,19 @@ body {
     align-items: center;
     font-size: 0.9rem;
     color: #a0aec0;
+    padding-top: 15px;
+    border-top: 1px solid #f7fafc;
+}
+
+.sheet-info span:first-child {
+    font-weight: 500;
+}
+
+.sheet-info span:last-child {
+    background: #f7fafc;
+    padding: 4px 8px;
+    border-radius: 8px;
+    color: #667eea;
 }
 
 /* Loading */
@@ -249,6 +338,52 @@ body {
     font-size: 2rem;
     margin-bottom: 15px;
     color: #667eea;
+}
+
+.loading p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.loading small {
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.loading button {
+    margin-top: 15px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.loading button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active {
+    background: #48bb78;
+}
+
+.status-inactive {
+    background: #a0aec0;
 }
 
 /* Footer */
@@ -302,6 +437,10 @@ body {
     .sheets-section {
         padding: 20px;
     }
+    
+    .sheet-card {
+        padding: 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -317,5 +456,10 @@ body {
     .search-button {
         padding: 15px 20px;
         font-size: 1rem;
+    }
+    
+    .sheets-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 } 

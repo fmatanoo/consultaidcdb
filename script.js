@@ -20,11 +20,12 @@ const sheetsContainer = document.getElementById('sheetsContainer');
 
 // Dados das abas
 let sheetsData = {};
+let sheetsInfo = [];
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Iniciando carregamento da aplicação...');
-    loadSheets();
+    loadAllSheets();
     setupEventListeners();
 });
 
@@ -38,51 +39,61 @@ function setupEventListeners() {
     });
 }
 
-// Carregar dados das abas
-async function loadSheets() {
-    console.log('Tentando carregar dados do Google Sheets...');
+// Carregar todas as abas disponíveis
+async function loadAllSheets() {
+    console.log('Tentando carregar todas as abas do Google Sheets...');
     
     try {
         // Mostrar loading
         sheetsContainer.innerHTML = `
             <div class="loading">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Carregando dados da planilha...</p>
+                <p>Carregando todas as abas da planilha...</p>
             </div>
         `;
 
-        const response = await fetch(SHEET_URL, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+        // Lista de abas conhecidas (você pode adicionar mais conforme necessário)
+        const knownSheets = [
+            { name: 'Identificadores', gid: '0' },
+            { name: 'Clientes', gid: '1' },
+            { name: 'Produtos', gid: '2' },
+            { name: 'Vendas', gid: '3' },
+            { name: 'Fornecedores', gid: '4' }
+        ];
+
+        sheetsData = {};
+        sheetsInfo = [];
+
+        // Carregar cada aba
+        for (const sheet of knownSheets) {
+            try {
+                const sheetData = await loadSheetData(sheet.gid);
+                if (sheetData && Object.keys(sheetData).length > 0) {
+                    sheetsData[sheet.name] = sheetData;
+                    sheetsInfo.push({
+                        name: sheet.name,
+                        count: Object.keys(sheetData).length,
+                        lastUpdate: new Date().toLocaleDateString('pt-BR')
+                    });
+                }
+            } catch (error) {
+                console.log(`Erro ao carregar aba ${sheet.name}:`, error.message);
             }
-        });
-
-        console.log('Resposta do Google Sheets:', response.status);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const text = await response.text();
-        console.log('Dados recebidos:', text.substring(0, 200) + '...');
-
-        // Verificar se a resposta contém dados válidos
-        if (!text.includes('google.visualization.Query.setResponse')) {
-            throw new Error('Resposta inválida do Google Sheets');
+        // Se nenhuma aba foi carregada, tentar carregar a aba padrão
+        if (Object.keys(sheetsData).length === 0) {
+            console.log('Tentando carregar aba padrão...');
+            const defaultSheetData = await loadSheetData('0');
+            if (defaultSheetData && Object.keys(defaultSheetData).length > 0) {
+                sheetsData['Identificadores'] = defaultSheetData;
+                sheetsInfo.push({
+                    name: 'Identificadores',
+                    count: Object.keys(defaultSheetData).length,
+                    lastUpdate: new Date().toLocaleDateString('pt-BR')
+                });
+            }
         }
-
-        // Extrair JSON da resposta
-        const jsonStart = text.indexOf('(') + 1;
-        const jsonEnd = text.lastIndexOf(')');
-        const jsonString = text.substring(jsonStart, jsonEnd);
-        
-        const jsonData = JSON.parse(jsonString);
-        console.log('Dados processados:', jsonData);
-
-        // Processar dados das abas
-        processSheetsData(jsonData);
         
         // Exibir abas disponíveis
         displaySheets();
@@ -97,7 +108,7 @@ async function loadSheets() {
                 <p>Erro ao carregar dados</p>
                 <small>${error.message}</small>
                 <br><br>
-                <button onclick="loadSheets()" class="search-button">
+                <button onclick="loadAllSheets()" class="search-button">
                     <i class="fas fa-refresh"></i> Tentar Novamente
                 </button>
             </div>
@@ -107,20 +118,55 @@ async function loadSheets() {
     }
 }
 
-// Processar dados das abas
-function processSheetsData(data) {
-    console.log('Processando dados das abas...');
+// Carregar dados de uma aba específica
+async function loadSheetData(gid) {
+    const sheetUrl = isLocalhost 
+        ? `http://localhost:8000/api/sheets?gid=${gid}`
+        : `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+
+    const response = await fetch(sheetUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const text = await response.text();
+    
+    // Verificar se a resposta contém dados válidos
+    if (!text.includes('google.visualization.Query.setResponse')) {
+        throw new Error('Resposta inválida do Google Sheets');
+    }
+
+    // Extrair JSON da resposta
+    const jsonStart = text.indexOf('(') + 1;
+    const jsonEnd = text.lastIndexOf(')');
+    const jsonString = text.substring(jsonStart, jsonEnd);
+    
+    const jsonData = JSON.parse(jsonString);
+    
+    // Processar dados da aba
+    return processSheetData(jsonData);
+}
+
+// Processar dados de uma aba
+function processSheetData(data) {
+    console.log('Processando dados da aba...');
     
     if (!data.table || !data.table.rows) {
         console.log('Estrutura de dados inválida:', data);
-        return;
+        return {};
     }
 
     const rows = data.table.rows;
     console.log(`Processando ${rows.length} linhas...`);
 
-    // Limpar dados anteriores
-    sheetsData = {};
+    const identifiers = {};
 
     // Processar cada linha
     rows.forEach((row, index) => {
@@ -129,48 +175,44 @@ function processSheetsData(data) {
             const identifier = row.c[0]?.v || '';
             
             if (identifier && identifier !== 'Identificador' && identifier !== 'customer_id') {
-                // Usar uma aba padrão para todos os identificadores
-                const sheetName = 'Identificadores';
-                
-                if (!sheetsData[sheetName]) {
-                    sheetsData[sheetName] = [];
-                }
-                
-                sheetsData[sheetName].push(identifier.toString());
+                identifiers[identifier.toString()] = {
+                    value: identifier.toString(),
+                    row: index + 1,
+                    found: true
+                };
             }
         }
     });
 
-    console.log('Dados processados:', sheetsData);
+    console.log(`Identificadores processados: ${Object.keys(identifiers).length}`);
+    return identifiers;
 }
 
 // Exibir abas disponíveis
 function displaySheets() {
-    const sheets = Object.keys(sheetsData);
-    console.log('Exibindo abas:', sheets);
+    console.log('Exibindo abas:', sheetsInfo);
     
-    if (sheets.length === 0) {
+    if (sheetsInfo.length === 0) {
         sheetsContainer.innerHTML = `
             <div class="loading">
                 <i class="fas fa-exclamation-triangle"></i>
-                <p>Nenhum identificador encontrado na planilha</p>
+                <p>Nenhuma aba encontrada na planilha</p>
                 <small>Verifique se a planilha está configurada corretamente</small>
             </div>
         `;
         return;
     }
     
-    const sheetsHTML = sheets.map(sheetName => {
-        const identifiers = sheetsData[sheetName];
+    const sheetsHTML = sheetsInfo.map(sheet => {
         return `
             <div class="sheet-card">
                 <h3>
                     <i class="fas fa-table"></i>
-                    ${sheetName}
+                    ${sheet.name}
                 </h3>
-                <p>${identifiers.length} identificadores cadastrados</p>
+                <p>${sheet.count} identificadores cadastrados</p>
                 <div class="sheet-info">
-                    <span>Última atualização: ${new Date().toLocaleDateString('pt-BR')}</span>
+                    <span>Última atualização: ${sheet.lastUpdate}</span>
                     <span><i class="fas fa-eye"></i></span>
                 </div>
             </div>
@@ -197,7 +239,7 @@ async function performSearch() {
         const result = searchInAllSheets(identifier);
         
         if (result.found) {
-            showSuccess(identifier, result.sheetName);
+            showSuccess(identifier, result.sheetName, result.details);
         } else {
             showNotFound(identifier);
         }
@@ -215,13 +257,13 @@ function searchInAllSheets(identifier) {
     
     for (const [sheetName, identifiers] of Object.entries(sheetsData)) {
         console.log(`Verificando aba: ${sheetName}`);
-        console.log(`Identificadores na aba:`, identifiers);
         
-        if (identifiers.includes(identifier.toString())) {
+        if (identifiers[identifier.toString()]) {
             console.log(`Identificador encontrado na aba: ${sheetName}`);
             return {
                 found: true,
-                sheetName: sheetName
+                sheetName: sheetName,
+                details: identifiers[identifier.toString()]
             };
         }
     }
@@ -229,19 +271,22 @@ function searchInAllSheets(identifier) {
     console.log('Identificador não encontrado');
     return {
         found: false,
-        sheetName: null
+        sheetName: null,
+        details: null
     };
 }
 
 // Mostrar resultado de sucesso
-function showSuccess(identifier, sheetName) {
+function showSuccess(identifier, sheetName, details) {
     resultCard.className = 'result-card success';
     resultIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
     resultTitle.textContent = 'Identificador Encontrado!';
     resultMessage.textContent = `O identificador "${identifier}" foi encontrado na base de dados.`;
     resultDetails.innerHTML = `
         <strong>Aba:</strong> ${sheetName}<br>
-        <strong>Data da consulta:</strong> ${new Date().toLocaleString('pt-BR')}
+        <strong>Linha na planilha:</strong> ${details.row}<br>
+        <strong>Data da consulta:</strong> ${new Date().toLocaleString('pt-BR')}<br>
+        <strong>Total de abas verificadas:</strong> ${Object.keys(sheetsData).length}
     `;
     
     resultSection.style.display = 'block';
@@ -256,7 +301,8 @@ function showNotFound(identifier) {
     resultMessage.textContent = `O identificador "${identifier}" não foi encontrado na base de dados.`;
     resultDetails.innerHTML = `
         <strong>Data da consulta:</strong> ${new Date().toLocaleString('pt-BR')}<br>
-        <strong>Total de abas verificadas:</strong> ${Object.keys(sheetsData).length}
+        <strong>Total de abas verificadas:</strong> ${Object.keys(sheetsData).length}<br>
+        <strong>Abas disponíveis:</strong> ${Object.keys(sheetsData).join(', ')}
     `;
     
     resultSection.style.display = 'block';
@@ -282,7 +328,7 @@ function showLoading() {
     resultCard.className = 'result-card';
     resultIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     resultTitle.textContent = 'Buscando...';
-    resultMessage.textContent = 'Verificando na base de dados...';
+    resultMessage.textContent = 'Verificando em todas as abas da planilha...';
     resultDetails.innerHTML = '';
     
     resultSection.style.display = 'block';
@@ -292,7 +338,7 @@ function showLoading() {
 // Função para atualizar dados (pode ser chamada periodicamente)
 function refreshData() {
     console.log('Atualizando dados...');
-    loadSheets();
+    loadAllSheets();
 }
 
 // Atualizar dados a cada 5 minutos
