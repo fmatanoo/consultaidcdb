@@ -1,164 +1,140 @@
-# Sistema de Consulta de Identificadores
+# Sistema de Consulta Customer ID
 
-Uma interface web simples e intuitiva para consultar identificadores através do Google Sheets como banco de dados.
+Sistema simples para carregar planilhas CSV e consultar o status de customer_ids.
 
-## 🚀 Funcionalidades
+## 🚀 Como Usar
 
-- **Interface moderna e responsiva** - Design agradável que funciona em desktop e mobile
-- **Integração com Google Sheets** - Conecta diretamente com sua planilha como banco de dados
-- **Consulta rápida** - Busca identificadores em todas as abas da planilha
-- **Feedback visual** - Resultados claros: encontrado ou não encontrado
-- **Visualização das abas** - Mostra todas as abas disponíveis na planilha
-- **Somente leitura** - Usuários não podem alterar os dados
+### 📊 **Interface Administrativa** (`/admin`)
+**Acesso restrito para você carregar planilhas:**
 
-## 📋 Pré-requisitos
+1. **Carregar Planilha CSV**
+   - Acesse: `http://localhost:5000/admin`
+   - Clique em "Carregar Nova Planilha"
+   - Selecione um arquivo CSV que contenha a coluna `customer_id`
+   - Clique em "Carregar Planilha"
+   - O sistema processará automaticamente
 
-1. **Google Sheets configurado** - Sua planilha deve estar configurada corretamente
-2. **Navegador moderno** - Chrome, Firefox, Safari, Edge
-3. **Conexão com internet** - Para acessar o Google Sheets
+2. **Ver Histórico**
+   - Visualize todas as planilhas carregadas
+   - Veja quantos customers estão ativos em cada planilha
+   - Acompanhe as datas de upload
 
-## 🛠️ Configuração
+3. **Baixar Relatório**
+   - Clique em "Baixar Relatório CSV"
+   - Receba um arquivo com todos os customers e seus status
 
-### 1. Estrutura da Planilha
+### 🔍 **Interface de Consulta** (`/`)
+**Acesso público para atendimento:**
 
-Sua planilha do Google Sheets deve ter a seguinte estrutura:
+1. **Consultar Customer ID**
+   - Acesse: `http://localhost:5000`
+   - Digite o customer_id no campo de busca
+   - Clique em "Consultar" ou pressione Enter
+   - Veja o resultado:
+     - ✅ **Ativo**: Customer está na última planilha carregada
+     - ⚠️ **Inativo**: Customer participou antes, mas não está mais ativo
+     - ❌ **Não encontrado**: Customer nunca esteve nas planilhas
 
+## 📋 Formato do CSV
+
+Seu arquivo CSV deve ter apenas uma coluna:
+
+```csv
+customer_id
+12345
+67890
+11111
 ```
-| Identificador | Outros_Dados |
-|---------------|--------------|
-| 25499984      | ...          |
-| 26069015      | ...          |
-| 25582047      | ...          |
+
+## 🛠️ Instalação
+
+1. **Instalar dependências:**
+```bash
+pip install -r requirements.txt
 ```
 
-### 2. Configuração da Planilha
+2. **Executar o sistema:**
+```bash
+python app.py
+```
 
-1. Abra sua planilha: https://docs.google.com/spreadsheets/d/1NV0uPbo7mppwdaVLpadnisr5EXBo6-F_3koAb-Dl9d0/edit?usp=sharing
-2. Configure as permissões para "Qualquer pessoa com o link pode visualizar"
-3. Organize os identificadores por abas conforme necessário
+3. **Acessar no navegador:**
+```
+http://localhost:5000
+```
 
-### 3. Executar a Aplicação
+## 📊 Funcionalidades
 
-1. Abra o arquivo `index.html` em seu navegador
-2. A interface carregará automaticamente os dados da planilha
-3. Digite um identificador no campo de busca
-4. Clique em buscar ou pressione Enter
+- ✅ **Upload simples** de planilhas CSV
+- ✅ **Consulta rápida** por customer_id
+- ✅ **Histórico completo** de todas as planilhas
+- ✅ **Status atual** (ativo/inativo)
+- ✅ **Relatórios** em CSV
+- ✅ **Interface responsiva** para mobile
 
-## 📁 Estrutura dos Arquivos
+## 🔧 Deploy no Vercel
+
+Para colocar online no Vercel:
+
+1. **Criar arquivo `vercel.json`:**
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ]
+}
+```
+
+2. **Fazer upload no Vercel**
+3. **Configurar variáveis de ambiente se necessário**
+
+## 📁 Estrutura do Projeto
 
 ```
 consulta_excel/
-├── index.html          # Interface principal
-├── styles.css          # Estilos da interface
-├── script.js           # Lógica JavaScript
-├── README.md           # Este arquivo
-└── identificadores_formatado.csv  # Seus dados locais
+├── app.py                 # Aplicação principal
+├── templates/
+│   ├── consulta.html     # Interface de consulta pública
+│   └── admin.html        # Interface administrativa
+├── static/
+│   ├── styles.css        # Estilos
+│   ├── consulta.js       # JavaScript da consulta
+│   └── admin.js          # JavaScript do admin
+├── uploads/              # Pasta para arquivos carregados
+├── customer_tracking.db  # Banco de dados SQLite
+├── requirements.txt      # Dependências Python
+└── exemplo_customers.csv # Arquivo de exemplo
 ```
 
-## 🎯 Como Usar
+## 🔗 URLs do Sistema
 
-### Consulta de Identificadores
+- **Consulta Pública**: `http://localhost:5000/` (para atendimento)
+- **Área Administrativa**: `http://localhost:5000/admin` (para você)
 
-1. **Digite o identificador** no campo de busca
-2. **Clique no botão de busca** ou pressione Enter
-3. **Aguarde o resultado**:
-   - ✅ **Verde**: Identificador encontrado
-   - ❌ **Vermelho**: Identificador não encontrado
+## 🎯 Exemplo de Uso
 
-### Visualização das Abas
-
-- A seção "Abas Disponíveis" mostra todas as abas da planilha
-- Cada aba exibe o número de identificadores cadastrados
-- Os dados são atualizados automaticamente a cada 5 minutos
-
-## 🔧 Personalização
-
-### Alterar a Planilha
-
-Para usar uma planilha diferente, edite o arquivo `script.js`:
-
-```javascript
-const SHEET_ID = 'SEU_NOVO_ID_DA_PLANILHA';
-```
-
-### Modificar Estilos
-
-Edite o arquivo `styles.css` para personalizar cores, fontes e layout.
-
-### Adicionar Funcionalidades
-
-O arquivo `script.js` contém todas as funções principais que podem ser estendidas.
-
-## 🔒 Segurança
-
-- A interface é somente leitura
-- Usuários não podem modificar os dados
-- Apenas você tem controle total da planilha
-- Dados são carregados via API pública do Google Sheets
-
-## 📱 Responsividade
-
-A interface é totalmente responsiva e funciona em:
-- Desktop (Windows, Mac, Linux)
-- Tablet (iPad, Android)
-- Smartphone (iPhone, Android)
-
-## 🚨 Solução de Problemas
-
-### Erro ao carregar dados
-
-**1. Teste primeiro com o arquivo de diagnóstico:**
-- Abra o arquivo `teste_planilha.html` no navegador
-- Clique em "🧪 Testar Acesso" para verificar se a planilha está acessível
-- Clique em "📊 Testar Dados" para verificar se os dados estão corretos
-
-**2. Verifique as configurações da planilha:**
-- A planilha deve estar configurada como "Qualquer pessoa com o link pode visualizar"
-- Vá em: Compartilhar → Configurações → Qualquer pessoa com o link pode visualizar
-- Certifique-se de que não há restrições de acesso
-
-**3. Verifique a estrutura da planilha:**
-- A primeira coluna deve conter os identificadores
-- O cabeçalho pode ser "Identificador" ou "customer_id"
-- Os dados devem estar na primeira aba (Sheet1)
-
-**4. Problemas de CORS:**
-- Se aparecer erro de CORS, abra o console do navegador (F12)
-- Verifique se há mensagens de erro relacionadas a "CORS" ou "Access-Control-Allow-Origin"
-
-### Identificadores não encontrados
-- Verifique se o formato está correto
-- Confirme se os dados estão na planilha
-- Aguarde a atualização automática (5 minutos)
-- Use o arquivo `teste_planilha.html` para verificar os dados
-
-### Interface não carrega
-- Verifique se todos os arquivos estão na mesma pasta
-- Abra o console do navegador (F12) para ver erros
-- Teste em outro navegador
-- Certifique-se de que está abrindo o arquivo `index.html` e não `teste_planilha.html`
-
-### Debug avançado
-1. Abra o console do navegador (F12)
-2. Vá na aba "Console"
-3. Recarregue a página
-4. Verifique se há mensagens de erro ou logs informativos
-5. Os logs começam com "Iniciando carregamento da aplicação..."
+1. **Carregue a primeira planilha** com customers ativos
+2. **Carregue uma segunda planilha** (alguns customers podem sair)
+3. **Consulte um customer_id** para ver se está ativo
+4. **Veja o histórico** de quando entrou e saiu
 
 ## 📞 Suporte
 
-Para dúvidas ou problemas:
-1. Verifique este README
-2. Teste em diferentes navegadores
-3. Confirme a configuração da planilha
-
-## 🔄 Atualizações
-
-O sistema atualiza automaticamente:
-- Dados da planilha: a cada 5 minutos
-- Interface: em tempo real
-- Resultados: imediatamente após a busca
+Se precisar de ajuda:
+- Verifique se o CSV tem a coluna `customer_id`
+- Confirme que o arquivo é válido
+- Teste com o arquivo de exemplo fornecido
 
 ---
 
-**Desenvolvido para consulta rápida e eficiente de identificadores via Google Sheets** 
+**Desenvolvido para facilitar a consulta de customer_ids de forma simples e intuitiva!** 🎉 
